@@ -1,10 +1,12 @@
 const express = require("express");
-const moment = require("moment");
 const { db } = require("../../utils/firebase");
 const {
     collection,
     doc,
     addDoc,
+    updateDoc,
+    getDoc,
+    setDoc,
 } = require("firebase/firestore");
 const router = express.Router();
 
@@ -20,21 +22,43 @@ router.get("/", async (req, res) => {
 
 router.post("/newUser", async (req, res) => {
     try {
-
         const newUser = {
             uid: req.body.uid,
-            nombre: req.body.nombre,
-            correo: req.body.correo,
+            photoURL: req.body.photoURL,
+            phoneNumber: req.body.phoneNumber,
+            displayName: req.body.displayName,
+            email: req.body.email,
         };
 
         const userCollectionRef = collection(db, "users");
-        const docRef = await addDoc(userCollectionRef, newUser);
-        
-        console.log("Documento insertado con ID:", docRef.id);
-        res.send(`User agregada: ${docRef.id}`);
+        const docRef = doc(userCollectionRef, String(newUser.uid));
 
+
+        // Verificar si el documento ya existe
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            // Si el documento ya existe, enviar un mensaje de error
+            const docRefUpdate = doc(userCollectionRef, newUser.uid);
+
+            const updatedData = {
+                displayName: newUser.displayName,
+            };
+
+            await updateDoc(docRefUpdate, updatedData);
+
+            res
+                .status(400)
+                .send(
+                    "Un documento con este uid ya existe y se actualizo correctamente"
+                );
+        } else {
+            // Si el documento no existe, insertarlo
+            await setDoc(docRef, newUser);
+            console.log("Documento insertado con ID:", docRef.id);
+            res.send(`Puntuacion agregada: ${docRef.id}`);
+        }
     } catch (error) {
-        console.log("Error en la ruta de puntuacion: ", error);
+        console.log("Error en la ruta de Users: ", error);
     }
 });
 

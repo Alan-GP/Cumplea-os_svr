@@ -39,25 +39,25 @@ const validarTokenGenrada = (req, res, next) => {
 
 const validarToken = async (req, res, next) => {
 	if (req.headers.authorization) {
-	  const auth = req.headers.authorization;
-	  const token = auth.split(' ')[1];
-  
-	  try {
-		// Verifica el token utilizando el SDK de Firebase
-		const decodedToken = await admin.auth().verifyIdToken(token);
-		
-		// La verificación fue exitosa, el token es válido
-		// Puedes acceder a la información del usuario a través de decodedToken
-		req.user = decodedToken;
-		next();
-	  } catch (error) {
-		console.error('Error al verificar el token de Firebase:', error);
-		res.sendStatus(401);
-	  }
+		const auth = req.headers.authorization;
+		const token = auth.split(' ')[1];
+
+		try {
+			// Verifica el token utilizando el SDK de Firebase
+			const decodedToken = await admin.auth().verifyIdToken(token);
+
+			// La verificación fue exitosa, el token es válido
+			// Puedes acceder a la información del usuario a través de decodedToken
+			req.user = decodedToken;
+			next();
+		} catch (error) {
+			console.error('Error al verificar el token de Firebase:', error);
+			res.sendStatus(401);
+		}
 	} else {
-	  res.sendStatus(401);
+		res.sendStatus(401);
 	}
-  };
+};
 
 const renovarToken = (req) => {
 	const auth = req.headers?.authorization;
